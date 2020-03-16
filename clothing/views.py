@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.core.handlers.wsgi import WSGIRequest
 # Create your views here.
+
 def GenerateOutfit(request:WSGIRequest):
     print(request.method)
     qparams = request.GET
