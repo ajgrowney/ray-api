@@ -21,7 +21,7 @@ from rest_framework import routers, serializers, viewsets
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('clothing/', include('clothing.urls')),
-    path('echo/', include('hello.urls')),
+    path('echo/', include('echo.urls')),
     path('food/', include('food.urls')),
     path('todo/', include('todo.urls'))
 ]
