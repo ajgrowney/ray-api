@@ -1,22 +1,26 @@
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.handlers.wsgi import WSGIRequest
 # Create your views here.
+def StandardResponse(status, results) -> dict:
+        responseType = type(results[0]) if len(results) > 0 else None
+        response = {"StatusCode": status, "Type": (responseType.__name__), "Results": results }
+        return response
 
 def LaundryView(request:WSGIRequest):
     message = "Checking Laundry"
-    return HttpResponse(message, status=200, content_type="text/plain")
+    return JsonResponse(StandardResponse(200, [message]))
 
 def GenerateOutfit(request:WSGIRequest):
     qparams = request.GET
-    shirt_id, pants_id = qparams.get('shirt'), qparams.get('pants')
-    print(shirt_id, pants_id)
+    type_id, top_id, bottom_id = qparams.get('type'), qparams.get('top'), qparams.get('bottom')
+    print(type_id,top_id, bottom_id)
     message="Generate outfit"
-    return HttpResponse(message, status=200, content_type="text/plain")
+    return JsonResponse(StandardResponse(200, [message]))
 
 def OutfitAccepted(request:WSGIRequest):
-    return HttpResponse("Outfit Accepted", status=200, content_type="text/plain")
+    return JsonResponse(StandardResponse(200, ["Outfit Accepted"]))
 
     
 def OutfitRejected(request:WSGIRequest):
-    return HttpResponse("Outfit Rejected", status=200, content_type="text/plain")
+    return JsonResponse(StandardResponse(200, ["Outfit Rejected"]))
