@@ -24,7 +24,7 @@
 -  /time 
     - GET: Check Current Time
 - /hello
-    - GET: Greeting
+    - GET: Greeting (based on time of day)
 
 
 ### Food (/food)
@@ -41,13 +41,9 @@
 -  /calendar
     - GET: 
     - /today
-        - GET: 
+        - GET: Get list of events today
     - /reminders
-        - GET 
-- /groceries
-    - GET: Get the current grocery list
-    - PUT: Update the current grocery list
-    - DELETE: Clear the current grocery list
+        - GET: Get list of active reminders 
 
 
 ### Django Terminology

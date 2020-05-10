@@ -1,42 +1,47 @@
 import os.path
 from django.shortcuts import render
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import HttpResponse
+from django.http import JsonResponse
 import sqlite3
+from .models import Reminder
 from datetime import datetime
 
+def StandardResponse(status, results) -> dict:
+    responseType = type(results[0]) if len(results) > 0 else None
+    if(responseType):
+    	response = {"StatusCode": status, "Type": (responseType.__name__), "Results": results }
+    else:
+        response = {"StatusCode": status, "Type": "None", "Results": []}
+    return response
+     
 # Create your views here.
 def CheckCalendar(request:WSGIRequest):
     qparams = request.GET
-    message = "Checking Calendar"
-    return HttpResponse(message, status=200, content_type="text/plain")
+    begin_range,end_range= qparams.get('begin'), qparams.get('end')
+    print(begin_range, end_range)
+    message = "Checking calendar from {0} to {1}".format(begin_range,end_range)
+    return JsonResponse(StandardResponse(200, [message]))
 
 def CheckToday(request:WSGIRequest):
     qparams = request.GET
     message = "Today's Events:"
-    return HttpResponse(message, status=200, content_type="text/plain")
+    return JsonResponse(StandardResponse(200, [message]))
 
 def CheckReminders(request:WSGIRequest):
-    BASEDIR = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(BASEDIR,"../dbs/ray_todo.db")
     if request.method == 'GET':
-        reminders = []
-        with sqlite3.connect(db_path) as db:
-            curs=db.cursor()
-            reminders = [r[0] for r in curs.execute("SELECT reminder FROM reminders;")]
-
-        reminders_str = ",".join(reminders)
-        message = "Reminders: {0}".format(reminders_str)
+        reminders = [r.text for r in Reminder.objects.all()] 
+        if len(reminders) == 0:
+            responseCode, response = 204,[] 
+        else:
+            responseCode, response= 200, reminders
 
     elif request.method == 'POST':
-        with sqlite3.connect(db_path) as db:
-            curs=db.cursor()
-            print(request.GET)
-            print(request.POST)
-            new_reminder = request.GET['reminder']  
-            sql = ''' INSERT INTO reminders(reminder,priority,time_created) VALUES(?,?,?); '''
-            datarow = (new_reminder, 2,datetime.now()) 
-            curs.execute(sql, datarow)
-            message = "New reminder added"
+        print(request.GET)
+        new_reminder = request.GET['reminder']  
+        new_priority = request.GET['priority'] if 'priority' in request.GET else -1
+        reminder = Reminder.objects.create(text=new_reminder, priority=new_priority,time=datetime.now()) 
+        reminder.save()
+        responseCode = 204
+        response=[] 
         
-    return HttpResponse(message, status=200, content_type="text/plain")
+    return JsonResponse(StandardResponse(responseCode, response))
