@@ -3,15 +3,23 @@ info:
   title: Ray API
   description: API built to interact with the data layer needed for Ray's services
   version: 0.0.1
-
+tags:
+  - name: current
+    description: Implemeneted
+  - name: future
+    description: To be implemented
 servers:
   - url: http://192.168.0.12:8000
     description: Server when running on dell inspiron
+  - url: http://192.168.0.38:8000
+    description: Server when running on macbook 
 
 paths:
   # ---- ECHO ----
   /echo/hello:
     get:
+      tags:
+      - future
       summary: 'Check if system is online'
       description: 'Idempotent request meant to check if system is online'
       responses:
@@ -29,6 +37,8 @@ paths:
               
   /echo/time:
     get:
+      tags:
+      - future
       summary: 'Check the current system time'
       description: 'Request to provide information about time on the system'
       responses:
@@ -45,43 +55,65 @@ paths:
               }
       
   # ---- CLOTHING ----
-  /clothing/item:
-
-  /clothing/items:
+  /clothing/item/{item_id}:
     get:
-      parameters:
-        
-  /clothing/outfit:
-    get:
-      parameters:
+      tags: 
+      - future
+      parameters: 
+      - in: path
+        name: item_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 'Success: ClothingItem Response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+              example:
+                statusCode: 200
+                type: 'ClothingItem'
+                results: 
+                - id: 1
+                  name: 'Life is good'
+                  type: 3
 
-      reponses:
-      
-  /clothing/outfit/accepted:
-    post:
-      parameters:
-
-      reponses:
-
-  /clothing/outfit/rejected:
-    post:
-      parameters:
-
-      reponses:
-      
-
-
-  # ---- FOOD ----
+  # # ---- FOOD ----
   /food/groceries:
+    get:
+      tags: 
+      - future
+      responses:
+        '200':
+          description: Groceries
 
   /food/recipes:
+    get:
+      tags:
+      - future
+      responses:
+        '200':
+          description: Recipes
+  
 
   # ---- TODO ----
   /todo/calendar:
+    get:
+      tags: 
+      - future
+      responses:
+        '200':
+          description: Calendar info
 
   /todo/reminders:
     get:
-
+      tags:
+      - future
+      responses:
+        '200':
+          description: Reminders
 components:
   schemas:
     StandardResponse:
@@ -98,4 +130,17 @@ components:
       required: 
         - statusCode
           results
+          type
+    ClothingItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+      required: 
+        - id
+          name
           type
