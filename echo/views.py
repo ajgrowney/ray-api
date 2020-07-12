@@ -10,17 +10,8 @@ def StandardResponse(status, results) -> dict:
         response = {"StatusCode": status, "Type": (responseType.__name__), "Results": results }
         return response
 
-def echoView(request):
-    if (datetime.now(timezone('America/Denver')).hour < 12):
-        message = "Good morning"
-    else:
-        message = "Hello" 
-    response = StandardResponse(200, [message]) 
+def healthCheck(request):
+    response = StandardResponse(200, ["healthy"]) 
     print((response))
     return JsonResponse(dict(response), safe=False)
 
-def echoTimeView(request):
-    message = datetime.now().time()
-    response = StandardResponse(200, [message]) 
-    print(type(response))
-    return JsonResponse(response, safe=False)

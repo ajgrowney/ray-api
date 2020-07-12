@@ -30,7 +30,8 @@
 ### Food (/food)
 #### Resources
 -  /recipes
-    - GET: List the recipes 
+    - GET: List the recipes
+- /items
 - /groceries
     - GET: Get the current grocery list
     - PUT: Update the current grocery list

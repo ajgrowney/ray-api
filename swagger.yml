@@ -114,6 +114,19 @@ paths:
       responses:
         '200':
           description: Reminders
+  /todo/reminders/<reminder_id>:
+    delete:
+      tags:
+      - current
+      responses:
+        '204':
+          description: Reminder deleted
+    get:
+      tags:
+      - future:
+      responses:
+        '200':
+          description: Successful retrieval of reminder
 components:
   schemas:
     StandardResponse:
