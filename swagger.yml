@@ -110,10 +110,17 @@ paths:
   /todo/reminders:
     get:
       tags:
-      - future
+      - current
       responses:
         '200':
           description: Reminders
+    post:
+      description: NEEDS TO BE REDONE
+      tags:
+        - current
+      responses:
+        '200':
+          description: Reminder Created
   /todo/reminders/<reminder_id>:
     delete:
       tags:
@@ -123,10 +130,15 @@ paths:
           description: Reminder deleted
     get:
       tags:
-      - future:
+      - current
       responses:
         '200':
           description: Successful retrieval of reminder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderItem'
+
 components:
   schemas:
     StandardResponse:
@@ -144,6 +156,18 @@ components:
         - statusCode
           results
           type
+    ReminderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+        priority:
+          type: integer
+        time:
+          type: string
+          format: datetime
     ClothingItem:
       type: object
       properties:

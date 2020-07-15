@@ -3,9 +3,10 @@ from django.shortcuts import render
 from django.core import serializers
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
+from django.forms.models import model_to_dict
 import sqlite3
 from .models import Reminder as ReminderDB
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def StandardResponse(status, results) -> dict:
     responseType = type(results[0]) if len(results) > 0 else None
@@ -17,9 +18,8 @@ def StandardResponse(status, results) -> dict:
      
 # Create your views here.
 def CheckCalendar(request:WSGIRequest):
-    qparams = request.GET
-    begin_range,end_range= qparams.get('begin'), qparams.get('end')
-    print(begin_range, end_range)
+    begin_range = request.GET.get('begin', default=str(datetime.now()-timedelta(days=1)))
+    end_range= request.GET.get('end', default=str(datetime.now()))
     message = "Checking calendar from {0} to {1}".format(begin_range,end_range)
     return JsonResponse(StandardResponse(200, [message]))
 
@@ -60,7 +60,8 @@ def Reminder(request:WSGIRequest, id:int):
         return JsonResponse(StandardResponse(200, [id]))
     elif request.method == 'GET':
         obj = ReminderDB.objects.get(id=id)
-        obj = obj.text
-        return JsonResponse(StandardResponse(200, [obj]))
+        response = model_to_dict(obj)
+        return JsonResponse(StandardResponse(200, [response]))
     else:
         return JsonResponse(StandardResponse(405, []))
+        
