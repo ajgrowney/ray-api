@@ -16,11 +16,11 @@ servers:
 
 paths:
   # ---- ECHO ----
-  /echo/hello:
+  /echo/health:
     get:
       tags:
-      - future
-      summary: 'Check if system is online'
+      - current
+      summary: 'System Health Check'
       description: 'Idempotent request meant to check if system is online'
       responses:
         '200':
@@ -32,28 +32,8 @@ paths:
               example: {
                 statusCode: 200,
                 type: "string",
-                results: ["Hello world 2"]
+                results: ["Healthy"]
               }
-              
-  /echo/time:
-    get:
-      tags:
-      - future
-      summary: 'Check the current system time'
-      description: 'Request to provide information about time on the system'
-      responses:
-        '200':
-          description: 'System time succeeded'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StandardResponse'
-              example: {
-                statusCode: 200,
-                type: "DateTime",
-                results: ["12:34:1234 MST"]
-              }
-      
   # ---- CLOTHING ----
   /clothing/item/{item_id}:
     get:
@@ -114,23 +94,48 @@ paths:
       responses:
         '200':
           description: Reminders
+        '500':
+          description: Internal Error
     post:
       description: NEEDS TO BE REDONE
       tags:
         - current
       responses:
-        '200':
+        '201':
           description: Reminder Created
-  /todo/reminders/<reminder_id>:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+              examples:
+               Success:
+                $ref: '#/components/examples/ReminderCreated'
+  /todo/reminders/{reminder_id}:
     delete:
       tags:
       - current
+      parameters:
+        - in: path
+          required: true
+          name: reminder_id
+          schema:
+            type: string
       responses:
         '204':
           description: Reminder deleted
+        '404':
+          description: Reminder not found
+        '500':
+          description: Error deleting the item
     get:
       tags:
       - current
+      parameters:
+        - in: path
+          required: true
+          name: reminder_id
+          schema:
+            type: string
       responses:
         '200':
           description: Successful retrieval of reminder
@@ -138,8 +143,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReminderItem'
-
+        '404':
+          description: Reminder not found
+        '500':
+          description: Error getting reminder
+  /todo/chores:
+    get:
+        tags:
+        - future
+        responses:
+          '200':
+            description: Chores
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ChoreItem'
+    post:
+      description: "Create a new chore"
+      tags:
+        - future
+      responses:
+        '200':
+          description: Chore Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 3
 components:
+  examples:
+    ReminderCreated:
+      value:
+        statusCode: 201
+        type: dict
+        results:
+        - id: 1
   schemas:
     StandardResponse:
       type: object
@@ -156,6 +197,13 @@ components:
         - statusCode
           results
           type
+    ChoreItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
     ReminderItem:
       type: object
       properties:

@@ -1,67 +1,93 @@
 import os.path
+import json
 from django.shortcuts import render
 from django.core import serializers
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
 import sqlite3
-from .models import Reminder as ReminderDB
+from .models import Reminder as ReminderDB, Chore as ChoreDB
 from datetime import datetime, timedelta
+from api_base import StandardResponse
 
-def StandardResponse(status, results) -> dict:
-    responseType = type(results[0]) if len(results) > 0 else None
-    if(responseType):
-    	response = {"StatusCode": status, "Type": (responseType.__name__), "Results": results }
-    else:
-        response = {"StatusCode": status, "Type": "None", "Results": []}
-    return response
-     
 # Create your views here.
 def CheckCalendar(request:WSGIRequest):
     begin_range = request.GET.get('begin', default=str(datetime.now()-timedelta(days=1)))
     end_range= request.GET.get('end', default=str(datetime.now()))
     message = "Checking calendar from {0} to {1}".format(begin_range,end_range)
-    return JsonResponse(StandardResponse(200, [message]))
+    return StandardResponse(200, [message])
 
 def CheckToday(request:WSGIRequest):
-    qparams = request.GET
-    message = "Today's Events:"
-    return JsonResponse(StandardResponse(200, [message]))
+    return StandardResponse(204, [])
 
 def Reminders(request:WSGIRequest):
     if request.method == 'GET':
-        if 'verbose' in request.GET:
-            reminders = list(ReminderDB.objects.values())
-        else:
-            reminders = [r.text for r in ReminderDB.objects.all()] 
-
-        if len(reminders) == 0:
-            responseCode, response = 204,[] 
-        else:
-            responseCode, response= 200, reminders
-
+        try:
+            if 'verbose' in request.GET:
+                reminders = list(ReminderDB.objects.values())
+            else:
+                reminders = [r.text for r in ReminderDB.objects.all()] 
+            response = reminders
+            responseCode = 200 if len(reminders) > 0 else 204
+        except Exception as e:
+            return StandardResponse(500, str(e))
     elif request.method == 'POST':
-        new_reminder = request.GET.get('reminder', default=None)
-        if not new_reminder:
+        try:
+            request_body = json.loads(request.body)
+        except:
             responseCode = 400
-            response = ["Bad Request: missing 'reminder' query parameter"]
+            response = ["Bad request: Malformed JSON Input"]
+            return StandardResponse(responseCode, response)
+
+        if 'text' not in request_body:
+            responseCode = 400
+            response = ["Bad Request: missing 'text' query parameter"]
         else:
-            new_priority = request.GET.get('priority', default=-1)
-            reminder = ReminderDB.objects.create(text=new_reminder, priority=new_priority, time=datetime.now()) 
+            reminder_text = request_body['text']
+            try:
+                reminder_priority = int(request_body['priority'])
+            except:
+                reminder_priority = -1
+
+            reminder = ReminderDB.objects.create(text=reminder_text, priority=reminder_priority, time=datetime.now()) 
             reminder.save()
-            responseCode = 204
-            response=[]
+            responseCode = 201
+            response = [{ "id": reminder.id }]
         
-    return JsonResponse(StandardResponse(responseCode, response))
+    return StandardResponse(responseCode, response)
 
 def Reminder(request:WSGIRequest, id:int):
     if request.method == 'DELETE':
-        ReminderDB.objects.get(id=id).delete()
-        return JsonResponse(StandardResponse(200, [id]))
-    elif request.method == 'GET':
-        obj = ReminderDB.objects.get(id=id)
-        response = model_to_dict(obj)
-        return JsonResponse(StandardResponse(200, [response]))
-    else:
-        return JsonResponse(StandardResponse(405, []))
         
+        try:
+            ReminderDB.objects.get(id=id).delete()
+            return StandardResponse(204, [])
+        except ReminderDB.DoesNotExist as e:
+            return StandardResponse(404, ["Resource does not exist"])
+        except Exception as e:
+            return StandardResponse(500, [str(e)])
+    
+    elif request.method == 'GET':
+        try:
+            obj = ReminderDB.objects.get(id=id)
+            response = model_to_dict(obj)
+            return StandardResponse(200, [response])
+        except ReminderDB.DoesNotExist as e:
+            return StandardResponse(404, ["Resource does not exist"])
+        except Exception as e:
+            return StandardResponse(500, [str(e)])
+    
+    else:
+        return StandardResponse(405, [])
+        
+def Chores(request:WSGIRequest):
+    if request.method == "GET":
+        chores = list(ChoreDB.objects.values())
+        responseCode = 200 if len(chores) > 0 else 204
+        response = chores
+    elif request.method == "POST":
+        responseCode, response = 500, ["Not implemented yet"]
+    else:
+        responseCode, response = 405, []
+
+    return StandardResponse(responseCode, response)

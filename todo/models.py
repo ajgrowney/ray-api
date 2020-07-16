@@ -6,3 +6,6 @@ class Reminder(models.Model):
 	priority=models.IntegerField(default=-1)
 	time=models.DateTimeField(null=True, blank=True)
 
+class Chore(models.Model):
+	text=models.CharField(max_length=128)
+	
