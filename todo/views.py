@@ -11,15 +11,6 @@ from datetime import datetime, timedelta
 from api_base import StandardResponse
 
 # Create your views here.
-def CheckCalendar(request:WSGIRequest):
-    begin_range = request.GET.get('begin', default=str(datetime.now()-timedelta(days=1)))
-    end_range= request.GET.get('end', default=str(datetime.now()))
-    message = "Checking calendar from {0} to {1}".format(begin_range,end_range)
-    return StandardResponse(200, [message])
-
-def CheckToday(request:WSGIRequest):
-    return StandardResponse(204, [])
-
 def Reminders(request:WSGIRequest):
     if request.method == 'GET':
         try:
