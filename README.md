@@ -39,12 +39,8 @@
 
 ### Todo (/todo)
 #### Resources
--  /calendar
-    - GET: 
-    - /today
-        - GET: Get list of events today
-    - /reminders
-        - GET: Get list of active reminders 
+- /reminders
+    - GET: Get list of active reminders
 
 
 ### Django Terminology

@@ -15,12 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls import url
 from rest_framework import routers, serializers, viewsets
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('clothing/', include('clothing.urls')),
+    path('', include('echo.urls')),
     path('echo/', include('echo.urls')),
     path('food/', include('food.urls')),
     path('todo/', include('todo.urls'))
